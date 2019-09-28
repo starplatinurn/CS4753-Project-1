@@ -20,11 +20,6 @@ int main(int argc, char * argv[]){
     }
     int num_misspelled = check_words(fp, hashtable, misspelled);
     fclose(fp);
-    printf("Misspelled Words:\n");
-    for (int i = 0; i < num_misspelled; i++){
-       printf("%s\n",misspelled[i]);
-    }
-    printf("Number Misspelled: %d\n",num_misspelled);
     /*The code below is to ensure there are no leaks by freeing the nodes from hashtable. 
     Its currently in func check_words()
     node *tmp;
