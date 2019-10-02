@@ -7,8 +7,16 @@
 
 bool check_word(const char* word, hashmap_t hashtable[])
 {
+    //check if word is larger than max word length
+    if(strlen(word) > LENGTH){
+        return false;
+    }
     //check if word is in dictionary
     int bucket = hash_function(word);
+    //make sure bucket exists in hashtable
+    if (bucket > HASH_SIZE - 1 || bucket < 0){
+        return false;
+    }
     hashmap_t cursor = hashtable[bucket];
     while(cursor != NULL){
         if(strcmp(word,cursor->word) == 0){
@@ -21,7 +29,7 @@ bool check_word(const char* word, hashmap_t hashtable[])
     for(int i = 0; i < strlen(word); i++){
         lower_case[i] = tolower(word[i]);
     }
-    lower_case[strlen(word)] = '\0';//this line fixed error in valgrind regarding uninitialized values-add to writeup
+    lower_case[strlen(word)] = '\0';//this line fixed error in valgrind regarding uninitialized values
     bucket = hash_function(lower_case);
     cursor = hashtable[bucket];
     while(cursor != NULL){
@@ -76,9 +84,10 @@ bool load_dictionary(const char* dictionary, hashmap_t hashtable[])
 int check_words(FILE* fp, hashmap_t hashtable[], char * misspelled[])
 {
     int num_misspelled = 0;
-    char line[4096];
+    char * line = NULL;
+    size_t len = 0;
     fprintf(stdout,"Misspelled Words:\n");
-    while(fgets(line,4096,fp)){
+    while(getline(&line,&len,fp) != -1){
         //Split the line on spaces.
         char * wrdtok = strtok(line," .,-’—!?\n\r;");
         while(wrdtok!= NULL){
@@ -90,6 +99,9 @@ int check_words(FILE* fp, hashmap_t hashtable[], char * misspelled[])
             wrdtok = strtok(NULL," .,-’—!?\n\r;");
         }
     }
+    if(line){
+        free(line);
+    }
     //The code below is to ensure there are no leaks by freeing the nodes from hashtable
     node *tmp;
     for(int i = 0; i < HASH_SIZE; i++){
@@ -100,5 +112,6 @@ int check_words(FILE* fp, hashmap_t hashtable[], char * misspelled[])
         }
     }
     fprintf(stdout,"Number Misspelled: %d\n",num_misspelled);
+    fclose(fp);
     return num_misspelled;
 }
